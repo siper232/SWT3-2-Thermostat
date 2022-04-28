@@ -5,6 +5,10 @@
 #include <cstdint>
 #include <cstdio>
 
+PwmOut heater_power(PTC2);
+DigitalOut redLed(PTB2);
+DigitalOut greenLed(PTB3);
+
 #define MESSAGE_MAX_SIZE 50
 #define MAX_TEMP 40
 
@@ -17,10 +21,6 @@ int main() {
 
   char message[MESSAGE_MAX_SIZE + 1];
   message[MESSAGE_MAX_SIZE] = '\0';
-
-  PwmOut heater_power(PTC2);
-  DigitalOut redLed(PTB2);
-  DigitalOut greenLed(PTB3);
 
   float prevTemp = 0;
 
@@ -51,18 +51,18 @@ int main() {
         } else if (temp + (tempDif * 4) > 35.0 && prevTemp != 0) {
           heater_power = 0;
         }
+      }
 
-        // led controll
-        if (temp > 30.0 && temp < 35.0 && heater_power == 0) {
-          redLed = 0;
-          greenLed = 1;
-        } else if (heater_power == 1) {
-          greenLed = 0;
-          redLed = 1;
-        } else {
-          redLed = 0;
-          greenLed = 0;
-        }
+      // led controll
+      if (temp > 30.0 && temp < 35.0 && heater_power == 0) {
+        redLed = 0;
+        greenLed = 1;
+      } else if (heater_power == 1) {
+        greenLed = 0;
+        redLed = 1;
+      } else {
+        redLed = 0;
+        greenLed = 0;
       }
 
       snprintf(message, MESSAGE_MAX_SIZE,
@@ -73,8 +73,7 @@ int main() {
       u8g2_SendBuffer(&oled);
 
       printf("%s\n", message);
-
-      ThisThread::sleep_for(100ms);
     }
+    ThisThread::sleep_for(100ms);
   }
 }
