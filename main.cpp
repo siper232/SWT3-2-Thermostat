@@ -6,6 +6,7 @@
 #include <cstdio>
 
 #define MESSAGE_MAX_SIZE 50
+#define MAX_TEMP 40
 
 int main() {
   board_init();
@@ -28,6 +29,7 @@ int main() {
     float voltage = 3.0 / 65535 * temp_plate;
 
     if (voltage < 0.21) {
+      heater_power = 0;
       printf("Sensor not working/unavailable\n");
 
       snprintf(message, MESSAGE_MAX_SIZE, "Sensor not working/unavailable");
@@ -41,7 +43,7 @@ int main() {
       float tempDif = (temp - prevTemp);
 
       // heater controll
-      if (temp > 35) {
+      if (temp > MAX_TEMP) {
         heater_power = 0;
       } else {
         if (temp < 31.0) {
