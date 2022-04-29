@@ -5,14 +5,15 @@
 #include <cstdint>
 #include <cstdio>
 
-PwmOut heater_power(PTC2);
-DigitalOut redLed(PTB2);
-DigitalOut greenLed(PTB3);
-
 #define MESSAGE_MAX_SIZE 50
-#define MAX_TEMP 40
+#define MAX_TEMP 35.0
+#define MIN_TEMP 30.0
 
 int main() {
+  PwmOut heater_power(PTC2);
+  DigitalOut redLed(PTB2);
+  DigitalOut greenLed(PTB3);
+
   board_init();
 
   u8g2_ClearBuffer(&oled);
@@ -30,7 +31,7 @@ int main() {
 
     if (voltage < 0.21) {
       heater_power = 0;
-      printf("Sensor not working/unavailable\n");
+      printf("Sensor not working/unavailable, voltage %5.02f\n", voltage);
 
       snprintf(message, MESSAGE_MAX_SIZE, "Sensor not working/unavailable");
 
@@ -43,12 +44,12 @@ int main() {
       float tempDif = (temp - prevTemp);
 
       // heater controll
-      if (temp > MAX_TEMP) {
+      if (temp > MAX_TEMP + 1) {
         heater_power = 0;
       } else {
-        if (temp < 31.0) {
+        if ((temp + (tempDif * 4) < MIN_TEMP + 0.5) && prevTemp != 0) {
           heater_power = 1;
-        } else if (temp + (tempDif * 4) > 35.0 && prevTemp != 0) {
+        } else if ((temp + (tempDif * 4) > MAX_TEMP) && prevTemp != 0) {
           heater_power = 0;
         }
       }
@@ -65,14 +66,21 @@ int main() {
         greenLed = 0;
       }
 
-      snprintf(message, MESSAGE_MAX_SIZE,
-               "Value is %-5d, temperature is %5.02f", temp_plate, temp);
+      prevTemp = temp;
+
+      if (temp > MAX_TEMP + 1) {
+        snprintf(message, MESSAGE_MAX_SIZE, "OVERHEATING at %5.02f OVERHEATING",
+                 temp);
+      } else {
+        snprintf(message, MESSAGE_MAX_SIZE, "Temperature is %5.02f", temp);
+      }
 
       u8g2_ClearBuffer(&oled);
       u8g2_DrawUTF8(&oled, 10, 10, message);
       u8g2_SendBuffer(&oled);
 
-      printf("%s\n", message);
+      printf("%s, and temp dif %5.02f and future temp %5.02f \n", message,
+             tempDif, (temp + (tempDif * 4)));
     }
     ThisThread::sleep_for(100ms);
   }
