@@ -58,12 +58,12 @@ int main() {
       }
 
       // led controll
-      if (temp > 30.0 && temp < 35.0 && heater_power == 0) {
-        redLed = 0;
-        greenLed = 1;
-      } else if (heater_power == 1) {
+      if (heater_power == 1) {
         greenLed = 0;
         redLed = 1;
+      } else if (temp > 30.0 && temp < 35.0) {
+        redLed = 0;
+        greenLed = 1;
       } else {
         redLed = 0;
         greenLed = 0;
