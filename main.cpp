@@ -31,6 +31,9 @@ int main() {
 
     if (voltage < 0.21) {
       heater_power = 0;
+      redLed = 0;
+      greenLed = 0;
+      
       printf("Sensor not working/unavailable, voltage %5.02f\n", voltage);
 
       snprintf(message, MESSAGE_MAX_SIZE, "Sensor not working/unavailable");
